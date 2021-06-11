@@ -69,6 +69,8 @@ AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 AC_ARG_ENABLE([icons-and-clipboard],
     [AS_HELP_STRING([--enable-icons-and-clipboard], [enable GTK tray icons and clipboard paste support])])
+AC_ARG_ENABLE([omemo-qrcode],
+    [AS_HELP_STRING([--enable-omemo-qrcode], [enable ability to display omemo qr code])])
 
 ### plugins
 
@@ -203,6 +205,11 @@ PKG_CHECK_MODULES([curl], [libcurl], [],
 PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
     [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity])])
 
+AS_IF([test "x$omemo_qrcode" != xno],
+    [PKG_CHECK_MODULES([libqrencode], [libqrencode],
+        [AC_DEFINE([HAVE_QRENCODE], [1], [qrcode module])]
+        [LIBS="-lqrencode $LIBS"]], []))
+
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
         [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
@@ -211,6 +218,7 @@ AS_IF([test "x$enable_icons_and_clipboard" != xno],
                                   [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
                                   [AC_MSG_ERROR([gtk+-2.0 >= 2.24.10 or gtk+-3.0 >= 3.24.0 is required for icons and clipboard])],
                                   [AC_MSG_NOTICE([gtk+-3.0/gtk+2.0 not found, icons and clipboard not enabled])])])])])
+
 
 AS_IF([test "x$PLATFORM" = xosx],
     [AC_CHECK_FILE([/usr/local/opt/readline/lib],
